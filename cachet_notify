@@ -1,18 +1,24 @@
-#!/usr/bin/php5
+#!/usr/bin/php
 <?php
+
+// read configuration files
+$config = parse_ini_file("config.ini",true);
 
 if ($argc != 6) {
 	echo 'Usage: ' . basename(__FILE__) . ' cachet_component service_name service_state service_state_type service_output' . "\n";
 	exit(1);
 }
 
-$cachet_url = 'http://xxxx/api/v1/';
-$api_key = 'xxxx';
+$cachet_url = 'https://10.49.5.54/api/v1/';
+$api_key = 'Z6aXM1tJWtoGjpMScK7G';
 
 $incident_prefix = '[Nagios]';
 $cachet_notify_subscribers = true; // Enable subscribers notifcation for incidents creation and updates
 
-$cachet_component = $argv[1];
+$cachet_component = $config['component'][$argv[1]];
+if ($config['component'][$argv[1]] == null) {
+	$cachet_component = $argv[1];	
+} 
 $service_name = $argv[2];
 $service_status = $argv[3];
 $service_status_type = $argv[4];
@@ -102,7 +108,9 @@ if ($service_status != 'OK' && $service_status_type == 'SOFT') { // Hope it will
 		'notify' => $cachet_notify_subscribers,
 		'component_status' => 4,
 	);
+	print_r($query);
 	$result = cachet_query('incidents', 'POST', $query);
+	print_r($result);
 	if ($result['code'] != 200) {
 		echo 'Can\'t create incident' . "\n";
 		exit(1);
